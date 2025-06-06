@@ -1,0 +1,46 @@
+FROM ruby:3.4-slim
+
+# Install system dependencies
+RUN apt-get update -qq && apt-get install -y --no-install-recommends \
+  build-essential \
+  libpq-dev \
+  libvips \
+  libyaml-dev \
+  unzip \
+  curl \
+  git \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install Bun
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:$PATH"
+
+
+
+# Install Rails
+RUN gem install rails -v '~>8.0.0'
+
+# Set workdir
+WORKDIR /app
+
+# Install bundler
+RUN gem install bundler
+RUN bundle config set path '/usr/local/bundle'
+
+# Copy Gemfiles first for caching
+COPY ./Gemfile ./Gemfile.lock ./
+
+# Install gems
+RUN bundle install
+
+# Install Bun dependencies (will error if no package.json, fine for now)
+RUN bun install || true
+
+# Copy everything
+COPY . .
+
+# Expose port
+EXPOSE 3000
+
+# Default command
+CMD ["rails", "server", "-b", "0.0.0.0"]

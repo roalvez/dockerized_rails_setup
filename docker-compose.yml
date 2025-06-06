@@ -1,0 +1,26 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: app # change the container name to your desired name
+    volumes:
+      - .:/app
+    ports:
+      - "3000:300 0"
+    depends_on:
+      - db
+  db:
+    image: postgres:16
+    container_name: db # change the container name to your desired name
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
+  bundle:
